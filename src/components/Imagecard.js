@@ -1,6 +1,7 @@
 import React from 'react';
 import {Text, StyleSheet, Image, View} from 'react-native';
 import {wp} from '../constant/responsive';
+import Colors from '../constant/Colors';
 
 export default function ImageCard({imageurl, title, species}) {
   return (
@@ -9,7 +10,7 @@ export default function ImageCard({imageurl, title, species}) {
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="clip">
         {title}
       </Text>
-      <Text>{species}</Text>
+      <Text style={styles.subtitle}>{species}</Text>
     </View>
   );
 }
@@ -30,5 +31,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
+  },
+  subtitle: {
+    color: Colors.white,
   },
 });

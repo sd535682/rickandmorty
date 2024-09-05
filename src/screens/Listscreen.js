@@ -1,16 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import fetchAllCharacters from '../services/ApiConfig';
 import {MasonryFlashList} from '@shopify/flash-list';
 import ImageCard from '../components/Imagecard';
+import ImageBackgroundWrapper from '../components/Background';
+import {wp} from '../constant/responsive';
+import Colors from '../constant/Colors';
+import FilterChips from '../components/Filterchip';
 
-const filtersData = {
-  status: ['Alive', 'Dead', 'Unknown'],
-  species: ['Human', 'Alien', 'Other'],
-  gender: ['Male', 'Female', 'Unknown'],
-};
-
-export default function ListScreen({navigation}) {
+const ListScreen = ({navigation}) => {
   const [characters, setCharacters] = useState([]);
   const [filteredCharacters, setFilteredCharacters] = useState([]);
   const [filters, setFilters] = useState({
@@ -18,30 +21,53 @@ export default function ListScreen({navigation}) {
     species: null,
     gender: null,
   });
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      const data = await fetchAllCharacters();
-      setCharacters(data);
-      setFilteredCharacters(data);
-    })();
+    loadCharacters();
   }, []);
 
   useEffect(() => {
     setFilteredCharacters(
       characters.filter(
         char =>
-          (!filters.status || char.status === filters.status) &&
-          (!filters.species || char.species === filters.species) &&
-          (!filters.gender || char.gender === filters.gender),
+          (!filters.status ||
+            char.status.toLowerCase() === filters.status.toLowerCase()) &&
+          (!filters.species ||
+            (filters.species.toLowerCase() === 'unknown'
+              ? char.species.toLowerCase() !== 'human' &&
+                char.species.toLowerCase() !== 'alien'
+              : char.species.toLowerCase() ===
+                filters.species.toLowerCase())) &&
+          (!filters.gender ||
+            char.gender.toLowerCase() === filters.gender.toLowerCase()),
       ),
     );
   }, [filters, characters]);
 
+  const loadCharacters = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const data = await fetchAllCharacters(page);
+      if (data.results) {
+        setCharacters(prev => [...prev, ...data.results]);
+        setHasMore(data.info.next !== null);
+        setPage(prevPage => prevPage + 1);
+      }
+    } catch (error) {
+      console.error('Error loading characters:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleFilter = (type, value) => {
     setFilters(prev => ({
       ...prev,
-      [type]: prev[type] === value ? null : value,
+      [type]: prev[type]?.toLowerCase() === value.toLowerCase() ? null : value,
     }));
   };
 
@@ -57,86 +83,51 @@ export default function ListScreen({navigation}) {
     </TouchableOpacity>
   );
 
-  const renderChips = type => (
-    <View style={styles.filterRow}>
-      {filtersData[type].map(value => (
-        <TouchableOpacity
-          key={value}
-          style={[styles.chip, filters[type] === value && styles.selectedChip]}
-          onPress={() => toggleFilter(type, value)}>
-          <Text style={styles.chipText}>{value}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
+    <ImageBackgroundWrapper>
       <View style={styles.filterContainer}>
         {['status', 'species', 'gender'].map(type => (
-          <View key={type}>
-            <Text style={styles.filterLabel}>
-              {type.charAt(0).toUpperCase() + type.slice(1)}:
-            </Text>
-            {renderChips(type)}
-          </View>
+          <FilterChips
+            key={type}
+            type={type}
+            filters={filters}
+            toggleFilter={toggleFilter}
+          />
         ))}
       </View>
-      <MasonryFlashList
-        data={filteredCharacters}
-        numColumns={2}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderItem}
-        estimatedItemSize={300}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+      <View style={{flex: 1, width: wp(100)}}>
+        <MasonryFlashList
+          data={filteredCharacters}
+          numColumns={2}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderItem}
+          estimatedItemSize={300}
+          showsVerticalScrollIndicator={false}
+          onEndReached={loadCharacters}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loading && <ActivityIndicator size="large" color={Colors.green} />
+          }
+        />
+      </View>
+    </ImageBackgroundWrapper>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: 'black',
-  },
   filterContainer: {
     marginBottom: 10,
-  },
-  filterLabel: {
-    color: 'white',
-    fontSize: 16,
-    marginVertical: 5,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-  },
-  chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: '#666',
-    borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-  selectedChip: {
-    backgroundColor: '#fff',
-  },
-  chipText: {
-    color: '#fff',
-    fontSize: 14,
   },
   listCard: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'darkred',
     margin: 10,
     borderRadius: 15,
-    borderColor: 'white',
+    borderColor: Colors.yellow,
     borderWidth: 3,
     padding: 5,
   },
 });
+
+export default ListScreen;

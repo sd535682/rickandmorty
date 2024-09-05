@@ -1,6 +1,9 @@
 import {StyleSheet, Text, View} from 'react-native';
 import ImageCard from '../components/Imagecard';
 import {MasonryFlashList} from '@shopify/flash-list';
+import ImageBackgroundWrapper from '../components/Background';
+import {wp} from '../constant/responsive';
+import Colors from '../constant/Colors';
 
 export default function DetailScreen({route}) {
   const {char} = route.params;
@@ -19,52 +22,51 @@ export default function DetailScreen({route}) {
   }
 
   return (
-    <View style={styles.detailsScreen}>
+    <ImageBackgroundWrapper>
       <ImageCard imageurl={{uri: char.image}} title={char.name} />
       <Text style={styles.detailText}>Status: {char.status}</Text>
       <Text style={styles.detailText}>Species: {char.species}</Text>
       <Text style={styles.detailText}>Gender: {char.gender}</Text>
       <Text style={styles.detailText}>Origin: {char.origin.name}</Text>
       <Text style={styles.episodeHeader}>Episodes:</Text>
-      <MasonryFlashList
-        data={char.episode}
-        numColumns={2}
-        renderItem={renderItem}
-        estimatedItemSize={100}
-        keyExtractor={(item, index) => index.toString()}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+      <View style={{flex: 1, width: wp(100)}}>
+        <MasonryFlashList
+          data={char.episode}
+          numColumns={3}
+          renderItem={renderItem}
+          estimatedItemSize={100}
+          keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    </ImageBackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  detailsScreen: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: 'black',
-  },
   detailText: {
     fontSize: 16,
-    color: 'white',
+    color: Colors.white,
     marginVertical: 5,
   },
   episodeHeader: {
     fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 10,
-    color: 'white',
+    color: Colors.green,
   },
   episodeCard: {
+    backgroundColor: Colors.yellow,
     flex: 1,
-    backgroundColor: '#f0f0f0',
     margin: 5,
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.black,
   },
   episodeText: {
     fontSize: 16,
-    color: 'black',
+    color: Colors.black,
   },
 });

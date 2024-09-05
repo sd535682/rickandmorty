@@ -1,22 +1,17 @@
 const BASE_URL = 'https://rickandmortyapi.com/api/character';
 
-export default function fetchAllCharacters() {
-  let url = `${BASE_URL}`;
+export default function fetchAllCharacters(page = 1) {
+  const url = `${BASE_URL}?page=${page}`;
   return fetch(url)
-    .then(response => response.json())
-    .then(data => data.results)
-    .catch(error => {
-      console.error('Error fetching data :', error);
-      return [];
-    });
-}
-
-export const fetchCharacterDetails = id => {
-  return fetch(`${BASE_URL}/character/${id}`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
     .then(data => data)
     .catch(error => {
-      console.error('Error fetching character details:', error);
-      return null;
+      console.error('Error fetching data:', error);
+      throw error;
     });
-};
+}
