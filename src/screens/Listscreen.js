@@ -13,11 +13,12 @@ import {wp} from '../constant/responsive';
 import Colors from '../constant/Colors';
 import FilterChips from '../components/Filterchip';
 
-const ListScreen = ({navigation}) => {
+const ListScreen = ({navigation, route}) => {
+  const initialStatus = route.params?.status || 'all';
   const [characters, setCharacters] = useState([]);
   const [filteredCharacters, setFilteredCharacters] = useState([]);
   const [filters, setFilters] = useState({
-    status: null,
+    status: initialStatus !== 'all' ? initialStatus : null,
     species: null,
     gender: null,
   });
@@ -34,6 +35,7 @@ const ListScreen = ({navigation}) => {
       characters.filter(
         char =>
           (!filters.status ||
+            filters.status === 'all' ||
             char.status.toLowerCase() === filters.status.toLowerCase()) &&
           (!filters.species ||
             (filters.species.toLowerCase() === 'unknown'
@@ -51,7 +53,10 @@ const ListScreen = ({navigation}) => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const data = await fetchAllCharacters(page);
+      const data = await fetchAllCharacters(
+        page,
+        filters.status !== 'all' ? filters.status : null,
+      );
       if (data.results) {
         setCharacters(prev => [...prev, ...data.results]);
         setHasMore(data.info.next !== null);
@@ -69,6 +74,9 @@ const ListScreen = ({navigation}) => {
       ...prev,
       [type]: prev[type]?.toLowerCase() === value.toLowerCase() ? null : value,
     }));
+    setPage(1);
+    setCharacters([]);
+    setHasMore(true);
   };
 
   const renderItem = ({item}) => (

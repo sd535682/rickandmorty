@@ -22,17 +22,17 @@ export default function HomeScreen({navigation}) {
         horizontal={true}>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate('List', {type: 'alive'})}>
+          onPress={() => navigation.navigate('List', {status: 'alive'})}>
           <ImageCard imageurl={aliveCharImage} title={'Alive'} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate('List', {type: 'all'})}>
+          onPress={() => navigation.navigate('List', {status: 'all'})}>
           <ImageCard imageurl={allCharImage} title={'All'} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate('List', {type: 'dead'})}>
+          onPress={() => navigation.navigate('List', {status: 'dead'})}>
           <ImageCard imageurl={deadCharImage} title={'Dead'} />
         </TouchableOpacity>
       </ScrollView>
@@ -48,7 +48,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.black,
   },
-  app_title: {fontSize: 50, fontWeight: 'bold', textAlign: 'center'},
+  app_title: {
+    fontSize: 50,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: Colors.white,
+  },
+  app_subtitle: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: Colors.white,
+    marginBottom: 20,
+  },
   card: {
     height: hp(30),
     padding: 10,

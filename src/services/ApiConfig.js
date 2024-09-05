@@ -1,7 +1,10 @@
 const BASE_URL = 'https://rickandmortyapi.com/api/character';
 
-export default function fetchAllCharacters(page = 1) {
-  const url = `${BASE_URL}?page=${page}`;
+export default function fetchAllCharacters(page = 1, status = null) {
+  let url = `${BASE_URL}?page=${page}`;
+  if (status && status !== 'all') {
+    url += `&status=${status}`;
+  }
   return fetch(url)
     .then(response => {
       if (!response.ok) {
